@@ -1,0 +1,143 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include "socketlib.h"
+#include <string.h>
+#include <sys/socket.h>
+
+#define NAMESIZE 10
+
+typedef struct users {
+	char name[NAMESIZE];
+	int id;
+}users;
+
+char* readFirstWord(char* s) {
+	char *c;
+	c = malloc(sizeof(char)*20);
+	for(int i=0; i<20 ; i++){
+		if(s[i]==' ') break;
+		c[i]=s[i];
+	}
+	c[strlen(c)-1] = '\0';
+	printf("W funkcji %s %d\n", c, strlen(c));
+return c;
+}
+
+char* cutFirstWord(char* s) {
+	printf("%s strlen %d\n", s, strlen(s));
+	char *c;
+	int i=0;
+	int j=0;
+	int yon = 0;
+	c = malloc(sizeof(char)*40);
+	while(s[i] != '\n'){
+		if(yon==1){ 
+			c[j]=s[i];
+			j++;
+		}
+		if(s[i]==' ') yon=1;
+		i++;
+	}
+	printf("strlen %d", strlen(c));
+	c[strlen(c)-1] = '\n';
+	printf("W funkcji cut %s %d\n", c, strlen(c));
+return c;
+}
+
+
+int readwrite(int in, int out) {
+	char s[1024];
+	int i;
+
+	i=0;
+	while(read(in, s+i, 1) != 0) {
+		if (s[i] == '\n') {
+			write(out, s, i+1);
+			return i+1;
+		}
+	i++;
+	}
+return 0;
+}
+
+int main(int argc, char **argv) {
+
+	fd_set rfds, rfds2;
+	char *hn, *un;
+	int port, sock, fd;
+	char s[1024];
+	users us[10];
+	int max_des;
+	int max_ludzi=0;
+
+
+	hn = argv[1];
+	port = atoi(argv[2]);
+
+	sock = server_tcp_socket(hn, port);
+	listen(sock, 10);
+	max_des = sock;
+
+	FD_ZERO(&rfds);
+	FD_SET(sock, &rfds);
+
+	int u=0;
+	while(1){
+
+		memcpy(&rfds2, &rfds, sizeof(fd_set));
+		for(int a=0 ; a<1024 ; a++) s[a]='\0';
+		printf("Przed selectem\n");
+		select(max_des+1, &rfds2, NULL, NULL, NULL);
+	
+		if( FD_ISSET(sock, &rfds2) ) {
+			fd = accept_tcp_connection(sock);
+			if(max_des<fd) max_des = fd;
+			
+			read(fd, us[u].name , NAMESIZE);
+			us[u].id = fd;
+			u++;
+			FD_SET(fd, &rfds);
+			printf("Polaczyl sie %s\n", us[u-1].name);
+			max_ludzi++;
+			
+			for(int i=0 ; i<max_ludzi ; i++){
+				char c[20];
+				strcpy(c, us[i].name);
+				c[strlen(c)] = '\n';
+				write(fd, c, strlen(c));
+			}
+					
+		}
+		else {
+			printf("W elsie\n");
+			for(int l=0 ; l<max_ludzi ; l++){
+				if(FD_ISSET(us[l].id, &rfds2)){
+				read(us[l].id, s, 20);
+				for(int i=0 ; i<10 ; i++){
+					printf("W petli %s %d",us[i].name, strlen(us[i].name));
+					if(strcmp(us[i].name, readFirstWord(s))==0){
+						char *message;
+						message = malloc(40*sizeof(char));
+						message[0]='\0';
+						for(int q=0 ; q<40 ; q++) message[q]='\0';
+						strcat(message, us[l].name);
+						strcat(message, " ");
+						strcat(message, cutFirstWord(s));
+						message[strlen(message)]='\0';
+						write(us[i].id, message, strlen(message));
+						break;
+					}
+				}
+				//s[strlen(s)]='
+				break; 
+				}
+			}
+		}
+	}
+	
+	return 0;
+
+}

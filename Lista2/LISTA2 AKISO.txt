@@ -1,0 +1,37 @@
+LISTA 2
+ZAD.1
+	- dd /dev/sda count=1 | hexdump -c
+	-/proc to jeden z ciekawszych katalogów w systemie Linux. Za poœrednictwem znajduj¹cych siê
+ w nim plików j¹dro udostêpnia nam informacjê na temat parametrów pracy systemu oraz uruchomionych 
+procesów.
+	-/dev jest to katalog, w którym umieszczone s¹ pliki odpowiedzialne za urz¹dzenia systemu
+operacyjnego Linux (odpowiedniki sterowników dla urz¹dzeñ). Dostêp do tego katalogu posiada tylko
+ administrator systemu. Osoba ta mo¿e „montowaæ” urz¹dzenia i udostêpniaæ je innym u¿ytkownikom.
+	-cat meminfo - wyœwietla informacje o pamiêci. ls -l kproc - wyswietla informacje jak du¿o
+pamiêci RAM mamy zainstalowane w komputerze
+	-cat cpuinfo - informacje o procesorze
+
+ZAD.2
+	ps -e - pokazuje wszystkie procesy
+	ps -le - szczegolowe informacje o procesach
+
+ZAD.3 do³¹czony
+	-Wall - w³¹cza wszystkie ostrze¿enie (warning all)
+	-Pedantic - sprawdza zgodnoœæ kodu z ISO C90/C99
+ZAD.4
+	-cat | tac | sort
+ZAD.5
+	mkfifo FIFO
+	cat > FIFO
+	cat < FIFO
+
+
+czeka, a¿ dane z pierwszego terminala zostan¹ wypisane do koñca, poniewa¿ jest to FIFO(First in first
+out.)
+ZAD.6
+	#!/bin/bash
+for x in *
+do 
+	
+mv "$x" "$( echo $x | tr A-Z a-z)"
+done

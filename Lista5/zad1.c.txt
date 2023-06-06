@@ -1,0 +1,193 @@
+#include <stdio.h>
+#include <stdarg.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+void writeWord(char *c){
+	while(*c){
+		write(1,c,1);
+		c++;
+	}
+}
+
+int countLetters(char *c){
+	int how=0;
+	while(c[how]) how++;
+	return how;
+}
+
+char* replaceWord(char *c){
+	char *c2;
+	int how=countLetters(c);
+	int i = how-1;
+	c2 = malloc((how+1)*sizeof(char));
+	for(int j=0 ; j<how ; j++){
+		c2[j]=c[i];	
+		i--;
+	}
+	return c2;
+}
+
+/* x-liczba, d-system */
+char* intToChar(int x, int d){
+	char liczba[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+	char *c;
+	c = malloc(1*sizeof(char));
+	int i=0;
+	while(x>0){
+		c = realloc(c, (i+1)*sizeof(char));
+		c[i]=liczba[x%d];
+		x=x/d;
+		i++;
+	}
+	return replaceWord(c);
+}
+
+int tenPow(int how){
+	int number=1;
+	for(int i=0 ; i<how ; i++){
+		number = number*10;
+	}
+	return number;
+}
+
+int charToInt(char *x){
+	printf("Metoda dostaje: %s\n", x);
+	int number=0;
+	int n=0;
+	int length = countLetters(x);
+	for(int i=0 ; i<length ; i++){
+		n=x[i]-'0';
+		number = number + n*tenPow(length-1-i);	
+	}	
+	return number;
+}
+
+void myprintf(char *fmt, ...) {
+	va_list ap;
+	int d;
+	char c, *s;
+
+	va_start(ap, fmt);
+
+	char *h;
+
+	while(*fmt)	{
+		if(*fmt=='%') {
+			*fmt++;
+			switch(*fmt) {
+			case 's':	//napis
+				s = va_arg(ap, char*);
+				writeWord(s);
+				break;
+			case 'd':	//int
+				d = va_arg(ap, int);
+				writeWord(intToChar(d, 10));
+				break;
+			case 'c':
+				c = (char) va_arg(ap, int);
+				
+				write(1,fmt,1);
+				break;
+			case 'b':
+				d = va_arg(ap, int);
+				writeWord(intToChar(d, 2));
+				break;
+			case 'x':
+				d = va_arg(ap, int);
+				writeWord(intToChar(d,16));
+				break;
+			}
+		}
+		else {
+			write(1,fmt,1);
+		}
+		*fmt++;
+	}
+
+	va_end(ap);
+
+}
+
+void myscanf(char *fmt, ...) {
+
+va_list ap;
+
+char *c;
+char *c2;
+int *d;
+
+va_start(ap, fmt);
+
+char q[1024];
+
+read(0,q,1024);
+char *s;
+s = malloc(sizeof(char));
+int i=0;
+
+while(q[i]){
+	s = realloc(s, (i+1)*sizeof(char));
+	if(q[i]!=' ' && q[i]!='\n') s[i]=q[i];
+	else break;
+	i++;
+}
+
+while(*fmt){
+	if(*fmt=='%'){
+		*fmt++;
+		switch(*fmt){
+		case('c'):
+			c = va_arg(ap, char*);
+			break;
+		case('s'):
+			c2 = va_arg(ap, char*);
+			for(int i=0 ; i<countLetters(s) ; i++) {
+				*c2=s[i];
+				*c2++;
+				if(i==countLetters(s)-1) *c2='\0';
+			}
+			break;
+		case('d'):
+			d = va_arg(ap, int*);
+			*d = charToInt(s);
+			break;
+		case('b'):
+			d = va_arg(ap, int*);
+			*d = charToInt(intToChar(charToInt(s), 2));
+			break;
+		case('x'):
+			c2 = va_arg(ap, char*);
+			s = intToChar(charToInt(s), 16);
+			for(int i=0 ; i<countLetters(s) ; i++){
+				*c2=s[i];
+				*c2++;
+				if(i==countLetters(s)-1) *c2='\0';
+			}
+			break;		
+		}
+	}
+	*fmt++;
+}
+
+va_end(ap);
+
+}
+
+main(){
+
+	myprintf("Nazywam sie %s i mam\n", "Przemek");
+	myprintf("dziesietnie %d lat\n", 20);
+	myprintf("szesnastokowo %x lat\n", 20);
+	myprintf("binarnie %b lat\n", 20);
+	
+	char c[10];
+	int i;
+	//read(0,&c,1);
+
+	//myscanf("%c", &c);
+	//printf("c jest rowne %c\n", c);
+	myscanf("%x", c);
+	printf("i jest rowne %s\n", c);
+	//printf("i jest rowne w bin %d\n", i);	
+}

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+info() {
+	echo "Skrypt sluzacy do znalezienia duplikatow plikow w katalogu i jego podkatalogach. Uruchamianie:"
+	echo "$0 [katalog]"
+}
+
+if [ $# -lt 1 ];then
+	info
+	exit 1
+fi
+
+katalog=$1
+plik=~temp
+echo -n > $plik
+find $katalog* -type f | while read FILE; do
+rozmiar=$(stat -c %s "$FILE")
+md5=$(md5sum "$FILE" | head -c 32)
+echo -e "$md5\t$rozmiar\t$FILE" >> $plik
+done
+cat $plik | sort | uniq -D -w32 | sort -r -k2 | cut -f3
+rm $plik
